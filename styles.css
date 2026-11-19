@@ -139,3 +139,15 @@ pre.code { background: var(--code-bg); color: var(--code-text); padding: 14px; b
 .range-alt { margin: 12px 0 6px; font-size: .85rem; font-weight: 600; color: var(--muted); }
 .range-note { margin: 10px 0 0; font-size: .88rem; color: var(--muted); line-height: 1.45; }
 .range-note code { font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--text); }
+
+/* Navnebygger: afkrydsning og forklaring af dele */
+.builder label.check { display: flex; align-items: flex-start; gap: 10px; color: var(--text); font-size: .95rem; cursor: pointer; }
+.builder label.check input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--accent); }
+.builder label[hidden] { display: none; }
+.parts { display: flex; flex-wrap: wrap; gap: 6px; }
+.part-chip { font-size: .82rem; padding: 4px 10px; border-radius: 999px; background: var(--chip); }
+.part-chip code { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 700; }
+.part-scope { color: var(--builtin); }
+.part-type { color: var(--accent); }
+.part-name { color: var(--text); }
+.part-chip.part-name { color: var(--muted); }
