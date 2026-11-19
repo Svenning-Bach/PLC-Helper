@@ -215,68 +215,91 @@
   // ---------- Navnebygger ----------
   const TYPES = state => state.data.entries.filter(e => e.category === 'types');
   const SCOPES = [
-    { id: 'local', label: 'Lokal (VAR)', cds: '' },
-    { id: 'in', label: 'Input (VAR_INPUT)', cds: 'i_' },
-    { id: 'out', label: 'Output (VAR_OUTPUT)', cds: 'q_' },
-    { id: 'inout', label: 'In/Out (VAR_IN_OUT)', cds: 'io_' },
-    { id: 'global', label: 'Global', cds: 'g_' },
-    { id: 'const', label: 'Konstant', cds: 'c_' }
+    { id: 'local', label: 'Lokal (VAR)', prefix: '', desc: '' },
+    { id: 'in', label: 'Input (VAR_INPUT)', prefix: 'i', desc: 'input' },
+    { id: 'out', label: 'Output (VAR_OUTPUT)', prefix: 'q', desc: 'output' },
+    { id: 'inout', label: 'In/Out (VAR_IN_OUT)', prefix: 'io', desc: 'in/out' },
+    { id: 'global', label: 'Global', prefix: 'g', desc: 'global' },
+    { id: 'const', label: 'Konstant', prefix: 'c', desc: 'konstant' }
+  ];
+  const CASES = [
+    { id: 'camel', label: 'camelCase', ex: 'startButton' },
+    { id: 'pascal', label: 'PascalCase', ex: 'StartButton' },
+    { id: 'snake', label: 'snake_case', ex: 'start_button' },
+    { id: 'pascalsnake', label: 'Pascal_Snake_Case', ex: 'Start_Button' },
+    { id: 'upper', label: 'UPPER_CASE', ex: 'START_BUTTON' }
   ];
   const words = s => norm(s).replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
   const cap = w => w.charAt(0).toUpperCase() + w.slice(1);
 
-  function buildName(style, scopeId, typeId, text) {
-    const w = words(text);
-    if (!w.length) return '';
-    const t = state.data.entries.find(e => e.id === typeId);
-    const scope = SCOPES.find(s => s.id === scopeId);
-    if (style === 'codesys') {
-      return (scope?.cds || '') + (t?.vendors.codesys.prefix || '') + w.map(cap).join('');
+  // Returnerer navnet som dele, så vi kan forklare hvad hver del betyder
+  function buildName(o) {
+    const w = words(o.text);
+    if (!w.length) return [];
+    const t = state.data.entries.find(e => e.id === o.type);
+    const scope = SCOPES.find(s => s.id === o.scope);
+    const parts = [];
+    const snakeStyle = ['snake', 'pascalsnake', 'upper'].includes(o.casing);
+    const hasPrefix = (o.useScope && scope?.prefix) || (o.useType && t);
+    if (o.useScope && scope?.prefix) parts.push({ text: scope.prefix + '_', kind: 'scope', desc: `scope: ${scope.desc}` });
+    if (o.useType && t) {
+      const tp = t.prefix.split(/[\s/]/)[0];
+      parts.push({ text: tp + (snakeStyle ? '_' : ''), kind: 'type', desc: `type: ${t.title}` });
     }
-    if (style === 'siemens') {
-      if (scopeId === 'const') return w.map(x => x.toUpperCase()).join('_');
-      const base = w.map((x, i) => i ? cap(x) : x).join('');
-      return t?.id === 'bool' && !/^(is|has|can)/.test(base) ? 'is' + cap(base) : base;
+    let name;
+    switch (o.casing) {
+      case 'camel': name = hasPrefix ? w.map(cap).join('') : w.map((x, i) => i ? cap(x) : x).join(''); break;
+      case 'pascal': name = w.map(cap).join(''); break;
+      case 'snake': name = w.join('_'); break;
+      case 'pascalsnake': name = w.map(cap).join('_'); break;
+      default: name = w.map(x => x.toUpperCase()).join('_');
     }
-    // Allen-Bradley: PascalCase med underscore mellem ord, maks 40 tegn
-    return w.map(cap).join('_').slice(0, 40);
+    parts.push({ text: name, kind: 'name', desc: 'beskrivende navn' });
+    return parts;
   }
 
   function renderBuilder() {
     setChrome('Navnebygger', false, 'builder');
-    const saved = store.get('builder', { style: 'codesys', scope: 'in', type: 'bool', text: 'start button' });
+    const def = { casing: 'camel', useType: true, useScope: true, scope: 'in', type: 'bool', text: 'start button' };
+    const saved = Object.assign({}, def, store.get('builder2', {}));
     const typeOpts = TYPES(state).map(e => `<option value="${esc(e.id)}">${esc(e.title)} (${esc(e.prefix)})</option>`).join('');
-    const scopeOpts = SCOPES.map(s => `<option value="${s.id}">${esc(s.label)}</option>`).join('');
+    const scopeOpts = SCOPES.map(s => `<option value="${s.id}">${esc(s.label)}${s.prefix ? ` (${s.prefix}_)` : ''}</option>`).join('');
+    const caseOpts = CASES.map(c => `<option value="${c.id}">${esc(c.label)} (fx ${esc(c.ex)})</option>`).join('');
     view.innerHTML = `
-      <div class="section-title">Byg et variabelnavn efter en navnestandard</div>
+      <div class="section-title">Byg et variabelnavn og kombinér stilarter</div>
       <div class="builder">
-        <label>Stil
-          <select id="bStyle">
-            <option value="codesys">CODESYS (ungarsk notation)</option>
-            <option value="siemens">Siemens styleguide (camelCase)</option>
-            <option value="ab">Allen-Bradley (Pascal_Case)</option>
-          </select></label>
-        <label>Scope<select id="bScope">${scopeOpts}</select></label>
-        <label>Datatype<select id="bType">${typeOpts}</select></label>
         <label>Hvad er det? (skriv med almindelige ord, gerne på engelsk)
           <input id="bText" type="text" placeholder="fx start button"></label>
-        <div><div class="hint">Forslag</div><div class="result" id="bResult">–</div></div>
+        <label>Skrivemåde<select id="bCasing">${caseOpts}</select></label>
+        <label class="check"><input id="bUseType" type="checkbox"> <span><strong>Ungarsk notation</strong> (typepræfiks, fx x for BOOL)</span></label>
+        <label id="bTypeWrap">Datatype<select id="bType">${typeOpts}</select></label>
+        <label class="check"><input id="bUseScope" type="checkbox"> <span><strong>Scope-præfiks</strong> (fx i_ for input, g_ for global)</span></label>
+        <label id="bScopeWrap">Scope<select id="bScope">${scopeOpts}</select></label>
+        <div><div class="hint">Resultat</div><div class="result" id="bResult">–</div></div>
+        <div class="parts" id="bParts"></div>
         <p class="hint" id="bHint"></p>
       </div>`;
-    const els = { style: $('#bStyle'), scope: $('#bScope'), type: $('#bType'), text: $('#bText') };
-    els.style.value = saved.style; els.scope.value = saved.scope; els.type.value = saved.type; els.text.value = saved.text;
-    const hints = {
-      codesys: 'Scope-præfiks + typepræfiks + PascalCase. Fx i_xStartButton.',
-      siemens: 'Siemens anbefaler ingen typepræfiks. BOOL får is/has foran, konstanter skrives med STORE_BOGSTAVER.',
-      ab: 'Tags er ikke case-sensitive. Maks 40 tegn, ingen dobbelte eller afsluttende underscore.'
-    };
+    const els = { text: $('#bText'), casing: $('#bCasing'), useType: $('#bUseType'), type: $('#bType'), useScope: $('#bUseScope'), scope: $('#bScope') };
+    els.text.value = saved.text; els.casing.value = saved.casing; els.type.value = saved.type; els.scope.value = saved.scope;
+    els.useType.checked = saved.useType; els.useScope.checked = saved.useScope;
     const update = () => {
-      const v = { style: els.style.value, scope: els.scope.value, type: els.type.value, text: els.text.value };
-      store.set('builder', v);
-      $('#bResult').textContent = buildName(v.style, v.scope, v.type, v.text) || '–';
-      $('#bHint').textContent = hints[v.style];
+      const o = { text: els.text.value, casing: els.casing.value, useType: els.useType.checked, type: els.type.value, useScope: els.useScope.checked, scope: els.scope.value };
+      store.set('builder2', o);
+      $('#bTypeWrap').hidden = !o.useType;
+      $('#bScopeWrap').hidden = !o.useScope;
+      const parts = buildName(o);
+      const full = parts.map(p => p.text).join('');
+      $('#bResult').innerHTML = parts.length ? parts.map(p => `<span class="part-${p.kind}">${esc(p.text)}</span>`).join('') : '–';
+      $('#bParts').innerHTML = parts.map(p => `<span class="part-chip part-${p.kind}"><code>${esc(p.text.replace(/_$/, ''))}</code> ${esc(p.desc)}</span>`).join('');
+      const tips = [];
+      if (o.useType && o.casing === 'camel') tips.push('Ungarsk notation + camelCase: præfikset står med småt, og hvert ord i navnet starter med stort. Det er CODESYS\' egen anbefaling.');
+      if (!o.useType && o.casing === 'camel') tips.push('Ren camelCase uden typepræfiks. Det anbefaler Siemens\' styleguide.');
+      if (o.casing === 'pascalsnake') tips.push('Pascal_Snake_Case er udbredt i Allen-Bradley, hvor tags ikke skelner mellem store og små bogstaver.');
+      if (o.casing === 'upper') tips.push('STORE_BOGSTAVER bruges normalt kun til konstanter.');
+      if (full.length > 40) tips.push(`Navnet er ${full.length} tegn. Allen-Bradley tillader højst 40.`);
+      $('#bHint').textContent = tips.join(' ');
     };
-    Object.values(els).forEach(el => el.addEventListener('input', update));
+    Object.values(els).forEach(el => { el.addEventListener('input', update); el.addEventListener('change', update); });
     update();
   }
 

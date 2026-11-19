@@ -12,7 +12,7 @@ Appen er en *Progressive Web App*: én kodebase i HTML/CSS/JavaScript, der kan i
 - Detaljevisning med præfiks, betydning, størrelse/område, kodeeksempel og forskelle pr. leverandør
 - Mærkning af om noget er officiel anbefaling, udbredt praksis eller indbygget
 - Favoritter (gemmes på enheden)
-- Navnebygger: skriv "start button", vælg scope og type, og få fx `i_xStartButton`, `isStartButton` eller `Start_Button`
+- Navnebygger: skriv "start button" og kombinér skrivemåde (camelCase, PascalCase, snake_case …) med ungarsk notation og scope-præfiks, fx `i_xStartButton`, `startButton` eller `Start_Button`
 - Lyst/mørkt tema, offline og installérbar
 
 ## Kør den på din computer
