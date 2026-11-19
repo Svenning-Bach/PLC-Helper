@@ -129,3 +129,13 @@ pre.code { background: var(--code-bg); color: var(--code-text); padding: 14px; b
 .tab { flex: 1; border: 0; background: none; padding: 8px 4px 10px; font-size: .75rem; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .tab span { font-size: 1.25rem; }
 .tab.active { color: var(--accent); }
+
+/* Værdiområde (min/max) */
+.range-box { background: var(--surface); border: 2px solid var(--accent); border-radius: 14px; padding: 14px; }
+.range-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.range-pair > div { background: var(--chip); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+.range-label { display: block; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.range-val { display: block; font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 800; font-size: 1.25rem; color: var(--text); overflow-wrap: anywhere; }
+.range-alt { margin: 12px 0 6px; font-size: .85rem; font-weight: 600; color: var(--muted); }
+.range-note { margin: 10px 0 0; font-size: .88rem; color: var(--muted); line-height: 1.45; }
+.range-note code { font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--text); }

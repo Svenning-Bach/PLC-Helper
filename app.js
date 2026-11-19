@@ -90,6 +90,7 @@
   const entryById = id => state.data.entries.find(e => e.id === id);
 
   function subtitleFor(e) {
+    if (e.valueRange && state.vendor === 'all') return `${e.valueRange.min}  …  ${e.valueRange.max}`;
     if (state.vendor !== 'all' && e.vendors[state.vendor]) {
       const v = e.vendors[state.vendor];
       return [v.type, v.note].filter(Boolean).join(' · ') || e.meaning;
@@ -169,6 +170,7 @@
         </div>
         <button class="fav-btn ${isFav ? 'on' : ''}" id="favToggle">${isFav ? '★ Gemt som favorit' : '☆ Gem som favorit'}</button>
       </div>
+      ${rangeBox(e)}
       ${e.example ? `<div class="section-title">Eksempel</div><pre class="code">${esc(e.example)}</pre>` : ''}
       <div class="section-title">Pr. leverandør</div>
       <div class="vendors">${vendors}</div>`;
@@ -177,6 +179,23 @@
       store.set('favs', [...state.favs]);
       renderEntry(id);
     });
+  }
+
+  function rangeBox(e) {
+    const r = e.valueRange;
+    if (!r) return '';
+    const pair = (min, max) => `
+      <div class="range-pair">
+        <div><span class="range-label">Min</span><span class="range-val">${esc(min)}</span></div>
+        <div><span class="range-label">Max</span><span class="range-val">${esc(max)}</span></div>
+      </div>`;
+    return `<div class="section-title">Værdiområde</div>
+      <div class="range-box">
+        ${pair(r.min, r.max)}
+        ${r.alt ? `<div class="range-alt">${esc(r.alt.label)}</div>${pair(r.alt.min, r.alt.max)}` : ''}
+        ${r.hex ? `<p class="range-note">Hex: <code>${esc(r.hex)}</code></p>` : ''}
+        ${r.note ? `<p class="range-note">${esc(r.note)}</p>` : ''}
+      </div>`;
   }
 
   function renderSearch() {

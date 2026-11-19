@@ -1,5 +1,5 @@
 // Service worker: gør appen tilgængelig offline. Hæv VERSION når filer ændres.
-const VERSION = 'plc-notation-v0.1.0';
+const VERSION = 'plc-notation-v0.2.0';
 const FILES = [
   './', 'index.html', 'styles.css', 'app.js', 'data/notation.json',
   'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png'
