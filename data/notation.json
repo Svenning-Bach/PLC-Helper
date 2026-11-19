@@ -1,0 +1,602 @@
+{
+  "version": "0.1.0",
+  "vendors": {
+    "codesys": { "name": "CODESYS", "short": "CDS" },
+    "siemens": { "name": "Siemens TIA Portal", "short": "SIE" },
+    "ab": { "name": "Allen-Bradley Studio 5000", "short": "AB" }
+  },
+  "status": {
+    "official": "Officiel anbefaling fra leverandøren",
+    "common": "Udbredt praksis (ikke en officiel regel)",
+    "builtin": "Indbygget i systemet / standarden"
+  },
+  "categories": [
+    { "id": "types", "name": "Datatyper", "icon": "01", "description": "Præfikser for elementære datatyper som BOOL, INT og REAL." },
+    { "id": "fb", "name": "Funktionsblokke", "icon": "FB", "description": "Standardblokke som R_TRIG, F_TRIG, TON og CTU." },
+    { "id": "scope", "name": "Scope og parametre", "icon": "{}", "description": "Præfikser der viser hvor en variabel lever: input, output, global, lokal." },
+    { "id": "io", "name": "I/O og adresser", "icon": "IO", "description": "Indgange, udgange, merkere og hardwareadresser." },
+    { "id": "pou", "name": "Bloknavne og typer", "icon": "[]", "description": "Navngivning af programmer, FB'er, funktioner, strukturer og enums." },
+    { "id": "rules", "name": "Best practices", "icon": "OK", "description": "Generelle regler for gode variabelnavne." }
+  ],
+  "entries": [
+    {
+      "id": "bool", "category": "types", "prefix": "x", "title": "BOOL", "meaning": "Boolsk værdi: TRUE/FALSE (1 bit)",
+      "size": "1 bit", "range": "FALSE / TRUE",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "BOOL", "prefix": "x", "note": "CODESYS' egne kodningsregler bruger x for BOOL (b er reserveret til BIT)." },
+        "siemens": { "type": "Bool", "prefix": "–", "note": "Siemens' styleguide anbefaler ingen typepræfiks. Brug et beskrivende navn, gerne som et spørgsmål: isRunning, motorOn." },
+        "ab": { "type": "BOOL", "prefix": "–", "note": "Ingen officiel præfiks. Mange bruger b_ eller ingen præfiks." }
+      },
+      "example": "xStartButton := TRUE;",
+      "tags": ["bit", "boolean", "sand", "falsk", "digital"]
+    },
+    {
+      "id": "bit", "category": "types", "prefix": "b", "title": "BIT", "meaning": "Enkelt bit inde i en struktur",
+      "size": "1 bit", "range": "0 / 1",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "BIT", "prefix": "b", "note": "Kun tilladt som element i en STRUCT eller FB." },
+        "siemens": { "type": "–", "prefix": "–", "note": "Ingen separat BIT-type. Brug Bool eller slice-adgang: myWord.%X3." },
+        "ab": { "type": "–", "prefix": "–", "note": "Adgang til enkelt bit med punktum: MyDint.5" }
+      },
+      "example": "stStatus.bReady",
+      "tags": ["bit", "slice"]
+    },
+    {
+      "id": "byte", "category": "types", "prefix": "by", "title": "BYTE", "meaning": "8-bit bitstreng",
+      "size": "8 bit", "range": "16#00 … 16#FF",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "BYTE", "prefix": "by", "note": "" },
+        "siemens": { "type": "Byte", "prefix": "–", "note": "" },
+        "ab": { "type": "SINT", "prefix": "–", "note": "AB har ingen BYTE. SINT (8 bit med fortegn) bruges i stedet." }
+      },
+      "example": "byStatusFlags := 16#0F;",
+      "tags": ["8 bit", "bitstreng"]
+    },
+    {
+      "id": "word", "category": "types", "prefix": "w", "title": "WORD", "meaning": "16-bit bitstreng",
+      "size": "16 bit", "range": "16#0000 … 16#FFFF",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "WORD", "prefix": "w", "note": "" },
+        "siemens": { "type": "Word", "prefix": "–", "note": "" },
+        "ab": { "type": "INT", "prefix": "–", "note": "AB har ingen WORD. INT bruges." }
+      },
+      "example": "wControlWord := 16#047F;",
+      "tags": ["16 bit", "bitstreng", "kontrolord"]
+    },
+    {
+      "id": "dword", "category": "types", "prefix": "dw", "title": "DWORD", "meaning": "32-bit bitstreng (double word)",
+      "size": "32 bit", "range": "16#0 … 16#FFFF_FFFF",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "DWORD", "prefix": "dw", "note": "" },
+        "siemens": { "type": "DWord", "prefix": "–", "note": "" },
+        "ab": { "type": "DINT", "prefix": "–", "note": "AB bruger DINT til næsten alt, også bitmønstre." }
+      },
+      "example": "dwAlarmBits",
+      "tags": ["32 bit", "bitstreng"]
+    },
+    {
+      "id": "sint", "category": "types", "prefix": "si", "title": "SINT", "meaning": "Short integer, 8 bit med fortegn",
+      "size": "8 bit", "range": "-128 … 127",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "SINT", "prefix": "si", "note": "USINT (uden fortegn, 0…255) har præfiks usi." },
+        "siemens": { "type": "SInt", "prefix": "–", "note": "USInt findes også." },
+        "ab": { "type": "SINT", "prefix": "–", "note": "Rockwell anbefaler DINT frem for SINT/INT, da controlleren regner hurtigst i 32 bit." }
+      },
+      "example": "siOffset := -5;",
+      "tags": ["heltal", "integer", "8 bit", "usint", "usi"]
+    },
+    {
+      "id": "int", "category": "types", "prefix": "i", "title": "INT", "meaning": "Integer, 16 bit med fortegn",
+      "size": "16 bit", "range": "-32768 … 32767",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "INT", "prefix": "i", "note": "UINT (0…65535) har præfiks ui." },
+        "siemens": { "type": "Int", "prefix": "–", "note": "Analoge indgange på S7 er typisk Int (0…27648 = 0…100 %)." },
+        "ab": { "type": "INT", "prefix": "–", "note": "Brug hellere DINT, medmindre data skal matche et eksternt format." }
+      },
+      "example": "iCounter := iCounter + 1;",
+      "tags": ["heltal", "integer", "16 bit", "uint", "ui"]
+    },
+    {
+      "id": "dint", "category": "types", "prefix": "di", "title": "DINT", "meaning": "Double integer, 32 bit med fortegn",
+      "size": "32 bit", "range": "-2 147 483 648 … 2 147 483 647",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "DINT", "prefix": "di", "note": "UDINT har præfiks udi." },
+        "siemens": { "type": "DInt", "prefix": "–", "note": "" },
+        "ab": { "type": "DINT", "prefix": "–", "note": "Standard-heltalstypen i Logix." }
+      },
+      "example": "diPosition := 120000;",
+      "tags": ["heltal", "integer", "32 bit", "udint", "udi"]
+    },
+    {
+      "id": "lint", "category": "types", "prefix": "li", "title": "LINT", "meaning": "Long integer, 64 bit med fortegn",
+      "size": "64 bit", "range": "-2^63 … 2^63-1",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "LINT", "prefix": "li", "note": "ULINT har præfiks uli." },
+        "siemens": { "type": "LInt", "prefix": "–", "note": "Kun S7-1500 (ikke S7-1200)." },
+        "ab": { "type": "LINT", "prefix": "–", "note": "Begrænset instruktionsunderstøttelse på ældre firmware." }
+      },
+      "example": "liTimestamp",
+      "tags": ["heltal", "integer", "64 bit", "ulint"]
+    },
+    {
+      "id": "real", "category": "types", "prefix": "r", "title": "REAL", "meaning": "Kommatal, 32 bit (single precision)",
+      "size": "32 bit", "range": "ca. ±3.4E38, ~7 cifres præcision",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "REAL", "prefix": "r", "note": "" },
+        "siemens": { "type": "Real", "prefix": "–", "note": "" },
+        "ab": { "type": "REAL", "prefix": "–", "note": "" }
+      },
+      "example": "rTemperature := 21.5;",
+      "tags": ["float", "kommatal", "decimal", "flydende"]
+    },
+    {
+      "id": "lreal", "category": "types", "prefix": "lr", "title": "LREAL", "meaning": "Kommatal, 64 bit (double precision)",
+      "size": "64 bit", "range": "ca. ±1.8E308, ~15 cifres præcision",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "LREAL", "prefix": "lr", "note": "" },
+        "siemens": { "type": "LReal", "prefix": "–", "note": "" },
+        "ab": { "type": "LREAL", "prefix": "–", "note": "Kun på nyere controllere og firmware." }
+      },
+      "example": "lrTotalVolume",
+      "tags": ["float", "double", "kommatal"]
+    },
+    {
+      "id": "string", "category": "types", "prefix": "s", "title": "STRING", "meaning": "Tekststreng (1 byte pr. tegn)",
+      "size": "Standard 80 tegn (CODESYS) / 254 (Siemens) / 82 (AB)",
+      "range": "",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "STRING", "prefix": "s", "note": "WSTRING (Unicode) har præfiks ws." },
+        "siemens": { "type": "String", "prefix": "–", "note": "WString til Unicode." },
+        "ab": { "type": "STRING", "prefix": "–", "note": "Struktur med .LEN og .DATA[82]." }
+      },
+      "example": "sRecipeName := 'Batch A';",
+      "tags": ["tekst", "string", "wstring", "ws"]
+    },
+    {
+      "id": "time", "category": "types", "prefix": "tim", "title": "TIME", "meaning": "Tidsvarighed (fx T#5S)",
+      "size": "32 bit (ms)", "range": "T#0MS … ca. T#49D",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "TIME", "prefix": "tim", "note": "LTIME har præfiks ltim. Mange bruger også t eller tim." },
+        "siemens": { "type": "Time", "prefix": "–", "note": "LTime på S7-1500 (ns-opløsning)." },
+        "ab": { "type": "DINT (ms)", "prefix": "–", "note": "Ingen TIME-type. Timer-preset er en DINT i millisekunder." }
+      },
+      "example": "timDelay := T#2S500MS;",
+      "tags": ["tid", "varighed", "ltime"]
+    },
+    {
+      "id": "tod", "category": "types", "prefix": "tod", "title": "TIME_OF_DAY", "meaning": "Klokkeslæt (fx TOD#14:30:00)",
+      "size": "32 bit", "range": "00:00:00 … 23:59:59.999",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "TIME_OF_DAY / TOD", "prefix": "tod", "note": "" },
+        "siemens": { "type": "Time_Of_Day", "prefix": "–", "note": "" },
+        "ab": { "type": "–", "prefix": "–", "note": "Læses med GSV WallClockTime som DINT-array." }
+      },
+      "example": "todShiftStart := TOD#06:00:00;",
+      "tags": ["klokkeslæt", "tid"]
+    },
+    {
+      "id": "dt", "category": "types", "prefix": "dt", "title": "DATE_AND_TIME", "meaning": "Dato og klokkeslæt",
+      "size": "64 bit", "range": "",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "DATE_AND_TIME / DT", "prefix": "dt", "note": "DATE har præfiks date." },
+        "siemens": { "type": "Date_And_Time / DTL", "prefix": "–", "note": "DTL (struktur) anbefales på S7-1200/1500." },
+        "ab": { "type": "–", "prefix": "–", "note": "WallClockTime via GSV." }
+      },
+      "example": "dtLastAlarm",
+      "tags": ["dato", "tidsstempel", "dtl"]
+    },
+    {
+      "id": "array", "category": "types", "prefix": "a", "title": "ARRAY", "meaning": "Liste af elementer af samme type",
+      "size": "", "range": "",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "ARRAY [x..y] OF …", "prefix": "a", "note": "Præfikset kombineres: arTemps = ARRAY OF REAL." },
+        "siemens": { "type": "Array[x..y] of …", "prefix": "–", "note": "" },
+        "ab": { "type": "TYPE[n]", "prefix": "–", "note": "Starter altid ved indeks 0." }
+      },
+      "example": "arTemps : ARRAY [1..10] OF REAL;",
+      "tags": ["liste", "tabel", "array"]
+    },
+    {
+      "id": "pointer", "category": "types", "prefix": "p", "title": "POINTER / REFERENCE", "meaning": "Peger eller reference til en anden variabel",
+      "size": "", "range": "",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "POINTER TO / REFERENCE TO", "prefix": "p / ref", "note": "" },
+        "siemens": { "type": "Variant / Ref_To / Any", "prefix": "–", "note": "Ref_To kun på S7-1500." },
+        "ab": { "type": "InOut-parameter i AOI", "prefix": "–", "note": "Ingen pointers. Brug InOut eller indirekte adressering." }
+      },
+      "example": "pData : POINTER TO BYTE;",
+      "tags": ["pointer", "reference", "adresse"]
+    },
+    {
+      "id": "rtrig", "category": "fb", "prefix": "R_TRIG", "title": "Rising trigger (stigende flanke)", "meaning": "Q er TRUE i én scan, når CLK går fra FALSE til TRUE",
+      "status": "builtin",
+      "vendors": {
+        "codesys": { "type": "R_TRIG", "prefix": "rtrig / fbRtrig", "note": "Standard IEC-blok. Instansnavn fx rtStart eller fbStartEdge." },
+        "siemens": { "type": "R_TRIG / P_TRIG / -|P|-", "prefix": "–", "note": "I LAD findes P-kontakten og P_TRIG. R_TRIG kræver en instans (multi-instance i FB)." },
+        "ab": { "type": "ONS / OSR", "prefix": "–", "note": "ONS (kontakt) eller OSR (output). Kræver en storage bit, fx StartButton_ONS." }
+      },
+      "example": "rtStart(CLK := xStartButton);\nIF rtStart.Q THEN\n  iCount := iCount + 1;\nEND_IF",
+      "tags": ["flanke", "edge", "rising", "positiv", "one shot", "ons", "osr", "p_trig"]
+    },
+    {
+      "id": "ftrig", "category": "fb", "prefix": "F_TRIG", "title": "Falling trigger (faldende flanke)", "meaning": "Q er TRUE i én scan, når CLK går fra TRUE til FALSE",
+      "status": "builtin",
+      "vendors": {
+        "codesys": { "type": "F_TRIG", "prefix": "ftrig / fbFtrig", "note": "" },
+        "siemens": { "type": "F_TRIG / N_TRIG / -|N|-", "prefix": "–", "note": "N-kontakten i LAD." },
+        "ab": { "type": "OSF", "prefix": "–", "note": "One Shot Falling." }
+      },
+      "example": "ftStop(CLK := xStopButton);",
+      "tags": ["flanke", "edge", "falling", "negativ", "n_trig", "osf"]
+    },
+    {
+      "id": "ton", "category": "fb", "prefix": "TON", "title": "Timer On-Delay (tilkoblingsforsinkelse)", "meaning": "Q bliver TRUE, når IN har været TRUE i tiden PT",
+      "status": "builtin",
+      "vendors": {
+        "codesys": { "type": "TON", "prefix": "ton / fbTon", "note": "Udgange: Q og ET (elapsed time)." },
+        "siemens": { "type": "TON / IEC_TIMER", "prefix": "–", "note": "Instans som multi-instance eller egen DB. Udgange Q og ET." },
+        "ab": { "type": "TON (TIMER)", "prefix": "–", "note": "Medlemmer: .PRE, .ACC (ms), .EN, .TT, .DN." }
+      },
+      "example": "tonFilter(IN := xSensor, PT := T#500MS);\nxSensorStable := tonFilter.Q;",
+      "tags": ["timer", "forsinkelse", "on delay", "tidsrelæ"]
+    },
+    {
+      "id": "tof", "category": "fb", "prefix": "TOF", "title": "Timer Off-Delay (frakoblingsforsinkelse)", "meaning": "Q forbliver TRUE i tiden PT, efter IN går FALSE",
+      "status": "builtin",
+      "vendors": {
+        "codesys": { "type": "TOF", "prefix": "tof / fbTof", "note": "" },
+        "siemens": { "type": "TOF", "prefix": "–", "note": "" },
+        "ab": { "type": "TOF (TIMER)", "prefix": "–", "note": "" }
+      },
+      "example": "tofFan(IN := xMotorRunning, PT := T#30S);",
+      "tags": ["timer", "efterløb", "off delay"]
+    },
+    {
+      "id": "tp", "category": "fb", "prefix": "TP", "title": "Timer Pulse (puls)", "meaning": "Giver en puls af fast længde PT ved stigende flanke på IN",
+      "status": "builtin",
+      "vendors": {
+        "codesys": { "type": "TP", "prefix": "tp / fbTp", "note": "" },
+        "siemens": { "type": "TP", "prefix": "–", "note": "" },
+        "ab": { "type": "–", "prefix": "–", "note": "Ingen TP i ladder. Byg med ONS + TON, eller brug TONR/FBD-blokke." }
+      },
+      "example": "tpHorn(IN := xAlarm, PT := T#2S);",
+      "tags": ["timer", "puls", "pulse"]
+    },
+    {
+      "id": "ctu", "category": "fb", "prefix": "CTU", "title": "Counter Up (optæller)", "meaning": "Tæller CV op ved hver stigende flanke på CU. Q = CV >= PV",
+      "status": "builtin",
+      "vendors": {
+        "codesys": { "type": "CTU", "prefix": "ctu / fbCtu", "note": "CTD (ned) og CTUD (op/ned) findes også." },
+        "siemens": { "type": "CTU / CTD / CTUD", "prefix": "–", "note": "" },
+        "ab": { "type": "CTU / CTD (COUNTER)", "prefix": "–", "note": "Medlemmer: .PRE, .ACC, .CU, .DN, .OV, .UN." }
+      },
+      "example": "ctuParts(CU := xPartSensor, RESET := xReset, PV := 100);",
+      "tags": ["tæller", "counter", "ctd", "ctud"]
+    },
+    {
+      "id": "sr", "category": "fb", "prefix": "SR / RS", "title": "Set/Reset flip-flop", "meaning": "Husker en tilstand. SR: set er dominant. RS: reset er dominant",
+      "status": "builtin",
+      "vendors": {
+        "codesys": { "type": "SR / RS", "prefix": "fbSr / fbRs", "note": "" },
+        "siemens": { "type": "SR / RS, -(S)- / -(R)-", "prefix": "–", "note": "" },
+        "ab": { "type": "OTL / OTU", "prefix": "–", "note": "Latch og unlatch coils i ladder." }
+      },
+      "example": "rsMotor(SET := xStart, RESET1 := xStop);",
+      "tags": ["latch", "hukommelse", "flip flop", "otl", "otu", "selvhold"]
+    },
+    {
+      "id": "fb-instance", "category": "fb", "prefix": "fb", "title": "Instans af egen funktionsblok", "meaning": "Variabel der er en instans af en FB",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "FB-instans", "prefix": "fb", "note": "fbMotor1 : FB_Motor;" },
+        "siemens": { "type": "Multi-instance / Instance DB", "prefix": "–", "note": "Instans-DB får automatisk navn som FB'en + _DB." },
+        "ab": { "type": "AOI-instans", "prefix": "–", "note": "Fx Motor1 : AOI_Motor." }
+      },
+      "example": "fbConveyor : FB_Conveyor;",
+      "tags": ["instans", "instance", "aoi"]
+    },
+    {
+      "id": "in", "category": "scope", "prefix": "in / i_", "title": "Input-parameter (VAR_INPUT)", "meaning": "Værdi der sendes ind i en blok",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "VAR_INPUT", "prefix": "in", "note": "Fx inxStart eller i_xStart. Vælg én stil og hold den." },
+        "siemens": { "type": "Input", "prefix": "–", "note": "Siemens viser selv sektionen. Styleguiden bruger camelCase uden præfiks." },
+        "ab": { "type": "Input (AOI)", "prefix": "–", "note": "" }
+      },
+      "example": "VAR_INPUT\n  i_xEnable : BOOL;\nEND_VAR",
+      "tags": ["input", "parameter", "var_input"]
+    },
+    {
+      "id": "out", "category": "scope", "prefix": "out / q_", "title": "Output-parameter (VAR_OUTPUT)", "meaning": "Værdi blokken returnerer",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "VAR_OUTPUT", "prefix": "out / q_", "note": "q_ følger IEC-bogstavet Q for udgang." },
+        "siemens": { "type": "Output", "prefix": "–", "note": "" },
+        "ab": { "type": "Output (AOI)", "prefix": "–", "note": "" }
+      },
+      "example": "VAR_OUTPUT\n  q_xDone : BOOL;\nEND_VAR",
+      "tags": ["output", "parameter", "var_output"]
+    },
+    {
+      "id": "inout", "category": "scope", "prefix": "io_", "title": "In/Out-parameter (VAR_IN_OUT)", "meaning": "Variabel der sendes ind som reference og kan ændres",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "VAR_IN_OUT", "prefix": "io_", "note": "" },
+        "siemens": { "type": "InOut", "prefix": "–", "note": "" },
+        "ab": { "type": "InOut (AOI)", "prefix": "–", "note": "Eneste måde at sende arrays og strukturer som reference." }
+      },
+      "example": "VAR_IN_OUT\n  io_stRecipe : ST_Recipe;\nEND_VAR",
+      "tags": ["inout", "reference", "var_in_out"]
+    },
+    {
+      "id": "global", "category": "scope", "prefix": "g_", "title": "Global variabel", "meaning": "Synlig i hele programmet",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "VAR_GLOBAL (GVL)", "prefix": "g_ / GVL.", "note": "Med {attribute 'qualified_only'} skrives GVL.navn, så præfiks er ikke nødvendigt." },
+        "siemens": { "type": "PLC-tag / global DB", "prefix": "–", "note": "Globale data skrives som \"DB_navn\".variabel." },
+        "ab": { "type": "Controller-scoped tag", "prefix": "–", "note": "Brug program-scoped tags hvor det er muligt." }
+      },
+      "example": "g_xEmergencyStop",
+      "tags": ["global", "gvl", "controller scope"]
+    },
+    {
+      "id": "local", "category": "scope", "prefix": "(intet) / l_", "title": "Lokal variabel (VAR)", "meaning": "Kun synlig inde i blokken",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "VAR", "prefix": "–", "note": "De fleste bruger kun typepræfiks for lokale variabler." },
+        "siemens": { "type": "Static / Temp", "prefix": "–", "note": "Temp-variabler er ikke gemt mellem scans. Nogle bruger tmp_ for Temp." },
+        "ab": { "type": "Program-scoped tag", "prefix": "–", "note": "" }
+      },
+      "example": "VAR\n  iIndex : INT;\nEND_VAR",
+      "tags": ["lokal", "local", "temp", "static"]
+    },
+    {
+      "id": "const", "category": "scope", "prefix": "c_ / STORE_CASE", "title": "Konstant", "meaning": "Værdi der ikke kan ændres i runtime",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "VAR CONSTANT", "prefix": "c_ / gc_", "note": "Mange skriver konstanter med STORE_BOGSTAVER: MAX_SPEED." },
+        "siemens": { "type": "Constant (lokale/globale konstanter)", "prefix": "–", "note": "Styleguiden bruger STORE_BOGSTAVER for konstanter." },
+        "ab": { "type": "Tag med Constant-flag", "prefix": "–", "note": "" }
+      },
+      "example": "c_iMaxParts : INT := 100;",
+      "tags": ["konstant", "constant"]
+    },
+    {
+      "id": "retain", "category": "scope", "prefix": "r_ / ret_", "title": "Retain / persistent", "meaning": "Bevares ved strømsvigt eller genstart",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "VAR RETAIN / PERSISTENT", "prefix": "–", "note": "Undgå r_ hvis du også bruger r for REAL. Brug hellere ret_." },
+        "siemens": { "type": "Retain-flueben i DB", "prefix": "–", "note": "" },
+        "ab": { "type": "Alle tags er retentive", "prefix": "–", "note": "Logix bevarer tag-værdier som standard." }
+      },
+      "example": "ret_diTotalCount",
+      "tags": ["retain", "persistent", "remanent"]
+    },
+    {
+      "id": "di", "category": "io", "prefix": "DI / I", "title": "Digital indgang", "meaning": "Fysisk digitalt signal ind i PLC'en (fx knap, sensor)",
+      "status": "builtin",
+      "vendors": {
+        "codesys": { "type": "%IX0.0", "prefix": "–", "note": "Map I/O til variabler i I/O-mapping." },
+        "siemens": { "type": "%I0.0", "prefix": "–", "note": "Tysk notation bruger E (Eingang) i stedet for I." },
+        "ab": { "type": "Local:1:I.Data.0", "prefix": "–", "note": "Lav alias-tags med sigende navne." }
+      },
+      "example": "xDI_StartButton AT %IX0.0 : BOOL;",
+      "tags": ["input", "indgang", "sensor", "%i", "eingang"]
+    },
+    {
+      "id": "do", "category": "io", "prefix": "DO / Q", "title": "Digital udgang", "meaning": "Fysisk digitalt signal ud af PLC'en (fx relæ, ventil)",
+      "status": "builtin",
+      "vendors": {
+        "codesys": { "type": "%QX0.0", "prefix": "–", "note": "" },
+        "siemens": { "type": "%Q0.0", "prefix": "–", "note": "Tysk notation: A (Ausgang)." },
+        "ab": { "type": "Local:2:O.Data.0", "prefix": "–", "note": "" }
+      },
+      "example": "xDO_MotorRun AT %QX0.0 : BOOL;",
+      "tags": ["output", "udgang", "relæ", "%q", "ausgang"]
+    },
+    {
+      "id": "ai", "category": "io", "prefix": "AI / IW", "title": "Analog indgang", "meaning": "Analogt signal ind (4–20 mA, 0–10 V)",
+      "status": "builtin",
+      "vendors": {
+        "codesys": { "type": "%IW0", "prefix": "–", "note": "" },
+        "siemens": { "type": "%IW64", "prefix": "–", "note": "Råværdi 0…27648. Skalér med NORM_X og SCALE_X." },
+        "ab": { "type": "Local:3:I.Ch0Data", "prefix": "–", "note": "Moduler kan skalere direkte til ingeniørenheder." }
+      },
+      "example": "iAI_Level_Raw, rAI_Level_Pct",
+      "tags": ["analog", "4-20ma", "0-10v", "skalering", "iw"]
+    },
+    {
+      "id": "ao", "category": "io", "prefix": "AO / QW", "title": "Analog udgang", "meaning": "Analogt signal ud (fx frekvensomformer-reference)",
+      "status": "builtin",
+      "vendors": {
+        "codesys": { "type": "%QW0", "prefix": "–", "note": "" },
+        "siemens": { "type": "%QW64", "prefix": "–", "note": "" },
+        "ab": { "type": "Local:4:O.Ch0Data", "prefix": "–", "note": "" }
+      },
+      "example": "iAO_SpeedRef",
+      "tags": ["analog", "output", "qw"]
+    },
+    {
+      "id": "marker", "category": "io", "prefix": "M", "title": "Merker / intern hukommelse", "meaning": "Intern bit eller ord i PLC'ens hukommelse",
+      "status": "builtin",
+      "vendors": {
+        "codesys": { "type": "%MX0.0", "prefix": "–", "note": "Brug hellere symbolske variabler." },
+        "siemens": { "type": "%M0.0", "prefix": "–", "note": "Styleguiden fraråder merkere. Brug DB'er i stedet." },
+        "ab": { "type": "Tags (ingen merkere)", "prefix": "–", "note": "Logix er fuldt tag-baseret." }
+      },
+      "example": "%M10.0",
+      "tags": ["merker", "flag", "memory", "%m"]
+    },
+    {
+      "id": "prg", "category": "pou", "prefix": "PRG_", "title": "Program", "meaning": "Program-POU der kaldes fra en task",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "PROGRAM", "prefix": "PRG_", "note": "MAIN kaldes ofte bare MAIN." },
+        "siemens": { "type": "OB (Organization Block)", "prefix": "–", "note": "OB1 = Main, OB100 = opstart, OB30-38 = cykliske." },
+        "ab": { "type": "Program / Routine", "prefix": "–", "note": "MainRoutine er standard." }
+      },
+      "example": "PRG_Conveyor",
+      "tags": ["program", "ob", "main", "task"]
+    },
+    {
+      "id": "fbtype", "category": "pou", "prefix": "FB_", "title": "Function Block (type)", "meaning": "Blok med hukommelse (instansdata)",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "FUNCTION_BLOCK", "prefix": "FB_", "note": "" },
+        "siemens": { "type": "FB", "prefix": "–", "note": "Styleguiden: PascalCase uden præfiks, fx Conveyor. Præfiks FB_ er dog meget udbredt." },
+        "ab": { "type": "AOI (Add-On Instruction)", "prefix": "AOI_", "note": "" }
+      },
+      "example": "FB_Motor, FB_Valve",
+      "tags": ["fb", "function block", "aoi"]
+    },
+    {
+      "id": "fc", "category": "pou", "prefix": "F_ / FC_", "title": "Function (funktion)", "meaning": "Blok uden hukommelse, returnerer en værdi",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "FUNCTION", "prefix": "F_ / FUN_", "note": "" },
+        "siemens": { "type": "FC", "prefix": "FC_", "note": "" },
+        "ab": { "type": "Subroutine (JSR)", "prefix": "–", "note": "" }
+      },
+      "example": "F_Scale(rIn, rMin, rMax)",
+      "tags": ["function", "fc", "funktion"]
+    },
+    {
+      "id": "struct", "category": "pou", "prefix": "ST_ / UDT_", "title": "Struktur (brugerdefineret type)", "meaning": "Samling af variabler i én type",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "STRUCT (DUT)", "prefix": "ST_ (type), st (variabel)", "note": "stRecipe : ST_Recipe;" },
+        "siemens": { "type": "PLC data type (UDT)", "prefix": "typ / UDT_", "note": "Styleguiden bruger præfikset typ, fx typMotor." },
+        "ab": { "type": "UDT", "prefix": "UDT_", "note": "" }
+      },
+      "example": "stMotor : ST_Motor;",
+      "tags": ["struct", "udt", "dut", "datatype"]
+    },
+    {
+      "id": "enum", "category": "pou", "prefix": "E_", "title": "Enumeration", "meaning": "Liste af navngivne værdier (fx tilstande)",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "ENUM", "prefix": "E_ (type), e (variabel)", "note": "Brug {attribute 'qualified_only'} så du skriver E_State.Idle." },
+        "siemens": { "type": "– (konstanter)", "prefix": "–", "note": "TIA har ingen ENUM. Brug konstanter af typen Int." },
+        "ab": { "type": "–", "prefix": "–", "note": "Ingen ENUM. Brug DINT-konstanter." }
+      },
+      "example": "eState : E_MachineState := E_MachineState.Idle;",
+      "tags": ["enum", "tilstand", "state machine"]
+    },
+    {
+      "id": "interface", "category": "pou", "prefix": "I_", "title": "Interface", "meaning": "Kontrakt som FB'er kan implementere (OOP)",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "INTERFACE", "prefix": "I_ / itf", "note": "" },
+        "siemens": { "type": "–", "prefix": "–", "note": "Ikke understøttet i klassisk TIA (dog i SIMATIC AX)." },
+        "ab": { "type": "–", "prefix": "–", "note": "" }
+      },
+      "example": "FUNCTION_BLOCK FB_Pump IMPLEMENTS I_Device",
+      "tags": ["interface", "oop", "objektorienteret"]
+    },
+    {
+      "id": "db", "category": "pou", "prefix": "DB_ / GVL_", "title": "Datablok / global variabelliste", "meaning": "Sted hvor globale data ligger",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "GVL", "prefix": "GVL_", "note": "" },
+        "siemens": { "type": "Global DB / Instance DB", "prefix": "DB_ / inst", "note": "" },
+        "ab": { "type": "Controller tags", "prefix": "–", "note": "" }
+      },
+      "example": "GVL_IO, DB_Recipes",
+      "tags": ["db", "gvl", "datablok"]
+    },
+    {
+      "id": "rule-descriptive", "category": "rules", "prefix": "Navn", "title": "Beskrivende navne", "meaning": "Navnet skal fortælle hvad variablen er, ikke hvordan den bruges lige nu",
+      "status": "official",
+      "vendors": {
+        "codesys": { "type": "", "prefix": "", "note": "Godt: xConveyorRunning. Dårligt: x1, temp, flag3." },
+        "siemens": { "type": "", "prefix": "", "note": "Styleguiden: brug engelske, sigende navne." },
+        "ab": { "type": "", "prefix": "", "note": "Brug tag-beskrivelser (descriptions) også." }
+      },
+      "example": "xConveyorRunning   (ikke: x1 eller flag3)",
+      "tags": ["regel", "navngivning", "læsbarhed"]
+    },
+    {
+      "id": "rule-case", "category": "rules", "prefix": "Aa", "title": "Store og små bogstaver", "meaning": "Vælg én skrivemåde og brug den overalt",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "", "prefix": "", "note": "Præfiks med småt + PascalCase: xMotorOn. Typer: FB_Motor." },
+        "siemens": { "type": "", "prefix": "", "note": "Variabler i camelCase (motorOn), blokke i PascalCase (Motor), konstanter i STORE_BOGSTAVER." },
+        "ab": { "type": "", "prefix": "", "note": "Tags er ikke case-sensitive, men brug PascalCase eller Under_Score for læsbarhed." }
+      },
+      "example": "camelCase, PascalCase, snake_case, UPPER_CASE",
+      "tags": ["camelcase", "pascalcase", "skrivemåde"]
+    },
+    {
+      "id": "rule-length", "category": "rules", "prefix": "40", "title": "Længde og tilladte tegn", "meaning": "Hold navne korte nok til at kunne læses i ladder",
+      "status": "builtin",
+      "vendors": {
+        "codesys": { "type": "", "prefix": "", "note": "Kun bogstaver, tal og _. Må ikke starte med tal. Ingen dobbelte __." },
+        "siemens": { "type": "", "prefix": "", "note": "Op til 128 tegn, men korte navne er mere læsbare i LAD." },
+        "ab": { "type": "", "prefix": "", "note": "Maks 40 tegn. Ingen dobbelte eller afsluttende underscore." }
+      },
+      "example": "Motor1_Run  (OK)   1Motor__Run_  (ikke OK)",
+      "tags": ["længde", "tegn", "underscore"]
+    },
+    {
+      "id": "rule-bool-names", "category": "rules", "prefix": "is", "title": "BOOL som et ja/nej-spørgsmål", "meaning": "Et boolsk navn skal kunne læses som sandt eller falsk",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "", "prefix": "", "note": "xIsRunning, xHasError, xDoorClosed." },
+        "siemens": { "type": "", "prefix": "", "note": "isRunning, hasError." },
+        "ab": { "type": "", "prefix": "", "note": "Motor_Running, Door_Closed." }
+      },
+      "example": "xDoorClosed  (ikke: xDoor)",
+      "tags": ["bool", "navngivning"]
+    },
+    {
+      "id": "rule-units", "category": "rules", "prefix": "_mm", "title": "Enheder i navnet", "meaning": "Skriv enheden på fysiske værdier",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "", "prefix": "", "note": "rSpeed_rpm, rPressure_bar, rLength_mm." },
+        "siemens": { "type": "", "prefix": "", "note": "Kan også stå i kommentaren, men navnet er synligt overalt." },
+        "ab": { "type": "", "prefix": "", "note": "Engineering units kan sættes på analoge moduler." }
+      },
+      "example": "rTankLevel_pct, rFlow_m3h",
+      "tags": ["enhed", "unit", "skalering"]
+    },
+    {
+      "id": "rule-consistency", "category": "rules", "prefix": "=", "title": "Konsistens slår perfektion", "meaning": "Følg virksomhedens eller projektets standard, også hvis du selv foretrækker noget andet",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "", "prefix": "", "note": "CODESYS har egne kodningsregler i hjælpen og statisk analyse der kan tjekke navne." },
+        "siemens": { "type": "", "prefix": "", "note": "Siemens Programming Styleguide for S7-1200/S7-1500 (gratis på Siemens Industry Online Support)." },
+        "ab": { "type": "", "prefix": "", "note": "Rockwells Logix 5000 Design Considerations og PlantPAx-guides." }
+      },
+      "example": "Skriv jeres navnestandard ned i projektet",
+      "tags": ["standard", "konsistens", "styleguide"]
+    },
+    {
+      "id": "rule-rds", "category": "rules", "prefix": "=A1", "title": "Kobl navne til el-diagrammet", "meaning": "Brug referencebetegnelsen fra el-tegningen (IEC 81346) i tag-navnet eller beskrivelsen",
+      "status": "common",
+      "vendors": {
+        "codesys": { "type": "", "prefix": "", "note": "Fx xB1_LevelHigh, hvor B1 er sensoren på tegningen." },
+        "siemens": { "type": "", "prefix": "", "note": "Kommentarfeltet er godt til fuld RDS-betegnelse." },
+        "ab": { "type": "", "prefix": "", "note": "Brug alias-tag med RDS-navn på I/O-punktet." }
+      },
+      "example": "xDI_B12_TankFull  (B12 = niveauføler på tegning)",
+      "tags": ["81346", "rds", "el-diagram", "referencebetegnelse"]
+    }
+  ]
+}

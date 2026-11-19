@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>PLC Notation</title>
+  <meta name="description" content="Opslag af ungarsk notation og navngivning for CODESYS, Siemens og Allen-Bradley.">
+  <meta name="theme-color" content="#0f3d5e">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="PLC Notation">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <button id="backBtn" class="icon-btn" aria-label="Tilbage" hidden>‹</button>
+    <h1 id="pageTitle">PLC Notation</h1>
+    <button id="themeBtn" class="icon-btn" aria-label="Skift lyst/mørkt tema">◐</button>
+  </header>
+
+  <div class="controls">
+    <input id="search" type="search" placeholder="Søg: R_TRIG, int, timer, flanke…" autocomplete="off" aria-label="Søg">
+    <div class="vendor-filter" role="group" aria-label="Vælg leverandør">
+      <button data-vendor="all" class="chip active">Alle</button>
+      <button data-vendor="codesys" class="chip">CODESYS</button>
+      <button data-vendor="siemens" class="chip">Siemens</button>
+      <button data-vendor="ab" class="chip">Allen-Bradley</button>
+    </div>
+  </div>
+
+  <main id="view" tabindex="-1"></main>
+
+  <nav class="tabbar" aria-label="Hovedmenu">
+    <button data-tab="home" class="tab active"><span>▦</span>Kategorier</button>
+    <button data-tab="favs" class="tab"><span>★</span>Favoritter</button>
+    <button data-tab="builder" class="tab"><span>✎</span>Navnebygger</button>
+  </nav>
+
+  <script src="app.js"></script>
+</body>
+</html>
