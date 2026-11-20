@@ -12,8 +12,84 @@
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* ignorer */ } }
   };
 
+  // ---------- Sprog (dansk/engelsk) ----------
+  const I18N = {
+    da: {
+      appTitle: 'PLC Notation', back: 'Tilbage', theme: 'Skift lyst/mørkt tema', langBtn: 'EN', langAria: 'Switch to English',
+      searchPh: 'Søg: R_TRIG, int, timer, flanke…', searchAria: 'Søg', vendorAria: 'Vælg leverandør', all: 'Alle',
+      menuAria: 'Hovedmenu', tabHome: 'Kategorier', tabFavs: 'Favoritter', tabBuilder: 'Navnebygger',
+      description: 'Opslag af ungarsk notation og navngivning for CODESYS, Siemens og Allen-Bradley.',
+      noResults: 'Ingen resultater.', categories: 'Kategorier', type: 'Type', prefix: 'Præfiks',
+      favOn: '★ Gemt som favorit', favOff: '☆ Gem som favorit', size: 'Størrelse', range: 'Område',
+      example: 'Eksempel', perVendor: 'Pr. leverandør', valueRange: 'Værdiområde',
+      search: 'Søgning', results: n => `${n} resultat${n === 1 ? '' : 'er'}`, resultsFor: (r, q) => `${r} for “${q}”`,
+      yourFavs: 'Dine gemte opslag', noFavs: 'Ingen favoritter endnu.<br>Tryk ☆ på et opslag for at gemme det her.',
+      loadError: m => `Kunne ikke indlæse data (${m}).<br>Start appen via en webserver, fx <code>python -m http.server</code>.`,
+      bTitle: 'Byg et variabelnavn og kombinér stilarter', bText: 'Hvad er det? (skriv med almindelige ord, gerne på engelsk)',
+      bTextPh: 'fx start button', bCasing: 'Skrivemåde', eg: 'fx',
+      bUseType: '<strong>Ungarsk notation</strong> (typepræfiks, fx x for BOOL)', bType: 'Datatype',
+      bUseScope: '<strong>Scope-præfiks</strong> (fx i_ for input, g_ for global)', bScope: 'Scope', bResult: 'Resultat',
+      scopeLabels: { local: 'Lokal (VAR)', in: 'Input (VAR_INPUT)', out: 'Output (VAR_OUTPUT)', inout: 'In/Out (VAR_IN_OUT)', global: 'Global', const: 'Konstant' },
+      scopeDesc: { in: 'input', out: 'output', inout: 'in/out', global: 'global', const: 'konstant' },
+      partScope: d => `scope: ${d}`, partType: d => `type: ${d}`, partName: 'beskrivende navn',
+      tipHungCamel: 'Ungarsk notation + camelCase: præfikset står med småt, og hvert ord i navnet starter med stort. Det er CODESYS\' egen anbefaling.',
+      tipCamel: 'Ren camelCase uden typepræfiks. Det anbefaler Siemens\' styleguide.',
+      tipPascalSnake: 'Pascal_Snake_Case er udbredt i Allen-Bradley, hvor tags ikke skelner mellem store og små bogstaver.',
+      tipUpper: 'STORE_BOGSTAVER bruges normalt kun til konstanter.',
+      tipLength: n => `Navnet er ${n} tegn. Allen-Bradley tillader højst 40.`
+    },
+    en: {
+      appTitle: 'PLC Notation', back: 'Back', theme: 'Toggle light/dark theme', langBtn: 'DA', langAria: 'Skift til dansk',
+      searchPh: 'Search: R_TRIG, int, timer, edge…', searchAria: 'Search', vendorAria: 'Choose vendor', all: 'All',
+      menuAria: 'Main menu', tabHome: 'Categories', tabFavs: 'Favorites', tabBuilder: 'Name builder',
+      description: 'Look up Hungarian notation and naming for CODESYS, Siemens and Allen-Bradley.',
+      noResults: 'No results.', categories: 'Categories', type: 'Type', prefix: 'Prefix',
+      favOn: '★ Saved as favorite', favOff: '☆ Save as favorite', size: 'Size', range: 'Range',
+      example: 'Example', perVendor: 'Per vendor', valueRange: 'Value range',
+      search: 'Search', results: n => `${n} result${n === 1 ? '' : 's'}`, resultsFor: (r, q) => `${r} for “${q}”`,
+      yourFavs: 'Your saved entries', noFavs: 'No favorites yet.<br>Tap ☆ on an entry to save it here.',
+      loadError: m => `Could not load data (${m}).<br>Start the app through a web server, e.g. <code>python -m http.server</code>.`,
+      bTitle: 'Build a variable name and combine styles', bText: 'What is it? (describe it in plain words, preferably in English)',
+      bTextPh: 'e.g. start button', bCasing: 'Naming style', eg: 'e.g.',
+      bUseType: '<strong>Hungarian notation</strong> (type prefix, e.g. x for BOOL)', bType: 'Data type',
+      bUseScope: '<strong>Scope prefix</strong> (e.g. i_ for input, g_ for global)', bScope: 'Scope', bResult: 'Result',
+      scopeLabels: { local: 'Local (VAR)', in: 'Input (VAR_INPUT)', out: 'Output (VAR_OUTPUT)', inout: 'In/Out (VAR_IN_OUT)', global: 'Global', const: 'Constant' },
+      scopeDesc: { in: 'input', out: 'output', inout: 'in/out', global: 'global', const: 'constant' },
+      partScope: d => `scope: ${d}`, partType: d => `type: ${d}`, partName: 'descriptive name',
+      tipHungCamel: 'Hungarian notation + camelCase: the prefix is lower case and every word in the name starts with a capital. This is CODESYS\' own recommendation.',
+      tipCamel: 'Plain camelCase without a type prefix. This is what the Siemens style guide recommends.',
+      tipPascalSnake: 'Pascal_Snake_Case is common in Allen-Bradley, where tags are not case sensitive.',
+      tipUpper: 'UPPER_CASE is normally only used for constants.',
+      tipLength: n => `The name is ${n} characters. Allen-Bradley allows at most 40.`
+    }
+  };
+  let lang = store.get('lang', 'da') === 'en' ? 'en' : 'da';
+  const t = (k, ...a) => { const v = I18N[lang][k]; return typeof v === 'function' ? v(...a) : v; };
+
+  // Lægger den engelske oversættelse (data/notation.en.json) oven på de danske data.
+  // Felter der mangler i oversættelsen beholder den danske tekst. Tags slås sammen,
+  // så man også kan søge på danske ord, når appen står på engelsk.
+  const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
+  function deepMerge(base, over) {
+    if (Array.isArray(base) && Array.isArray(over)) return [...new Set([...base, ...over])];
+    if (!isObj(base) || !isObj(over)) return over === undefined ? base : over;
+    const out = { ...base };
+    for (const k of Object.keys(over)) out[k] = deepMerge(base[k], over[k]);
+    return out;
+  }
+  function translate(da, en) {
+    if (!en) return da;
+    return {
+      ...da,
+      status: { ...da.status, ...en.status },
+      categories: da.categories.map(c => deepMerge(c, en.categories?.[c.id] || {})),
+      entries: da.entries.map(e => deepMerge(e, en.entries?.[e.id] || {}))
+    };
+  }
+
   const state = {
     data: null,
+    raw: { da: null, en: null },
     vendor: store.get('vendor', 'all'),
     favs: new Set(store.get('favs', [])),
     query: ''
@@ -33,6 +109,33 @@
       : matchMedia('(prefers-color-scheme: dark)').matches;
     const next = dark ? 'light' : 'dark';
     applyTheme(next); store.set('theme', next);
+  });
+
+  function applyStaticTexts() {
+    document.documentElement.lang = lang;
+    $$('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+    $$('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', t(el.dataset.i18nAria)));
+    $$('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+    $('meta[name="description"]').setAttribute('content', t('description'));
+    const lb = $('#langBtn');
+    lb.title = t('langAria');
+  }
+
+  // Henter engelsk data første gang der skiftes til engelsk
+  function loadLang(l) {
+    if (l === 'da' || state.raw.en) return Promise.resolve();
+    return fetch('data/notation.en.json')
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(d => { state.raw.en = d; });
+  }
+  function useData() { state.data = lang === 'en' ? translate(state.raw.da, state.raw.en) : state.raw.da; }
+
+  $('#langBtn').addEventListener('click', () => {
+    const next = lang === 'da' ? 'en' : 'da';
+    loadLang(next).then(() => {
+      lang = next; store.set('lang', lang);
+      applyStaticTexts(); useData(); render();
+    }).catch(() => { /* offline uden cache: bliv på nuværende sprog */ });
   });
 
   // ---------- Leverandørfilter ----------
@@ -99,7 +202,7 @@
   }
 
   function rowList(entries) {
-    if (!entries.length) return '<p class="empty">Ingen resultater.</p>';
+    if (!entries.length) return `<p class="empty">${t('noResults')}</p>`;
     return `<div class="list">${entries.map(e => `
       <button class="row" data-go="#/e/${esc(e.id)}">
         <span class="prefix">${esc(e.prefix)}</span>
@@ -112,12 +215,12 @@
     title.textContent = text;
     backBtn.hidden = !showBack;
     $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-    document.title = text === 'PLC Notation' ? text : `${text} · PLC Notation`;
+    document.title = text === t('appTitle') ? text : `${text} · ${t('appTitle')}`;
   }
 
   // ---------- Sider ----------
   function renderHome() {
-    setChrome('PLC Notation', false, 'home');
+    setChrome(t('appTitle'), false, 'home');
     const cats = state.data.categories.map(c => {
       const n = state.data.entries.filter(e => e.category === c.id).length;
       return `<button class="card" data-go="#/cat/${esc(c.id)}">
@@ -126,7 +229,7 @@
         <span class="count">${n}</span>
       </button>`;
     }).join('');
-    view.innerHTML = `<div class="section-title">Kategorier</div><div class="grid">${cats}</div>`;
+    view.innerHTML = `<div class="section-title">${t('categories')}</div><div class="grid">${cats}</div>`;
   }
 
   function renderCategory(id) {
@@ -147,8 +250,8 @@
       .map(([k, v]) => {
         const name = state.data.vendors[k]?.name || k;
         const rows = [
-          v.type ? `<dt>Type</dt><dd>${esc(v.type)}</dd>` : '',
-          v.prefix ? `<dt>Præfiks</dt><dd>${esc(v.prefix)}</dd>` : ''
+          v.type ? `<dt>${t('type')}</dt><dd>${esc(v.type)}</dd>` : '',
+          v.prefix ? `<dt>${t('prefix')}</dt><dd>${esc(v.prefix)}</dd>` : ''
         ].join('');
         return `<section class="vendor ${esc(k)}">
           <h4>${esc(name)}</h4>
@@ -165,14 +268,14 @@
         <div class="meta">
           <span class="pill">${esc(c?.name)}</span>
           ${e.status ? `<span class="pill ${esc(e.status)}">${esc(state.data.status[e.status] || e.status)}</span>` : ''}
-          ${e.size ? `<span class="pill">Størrelse: ${esc(e.size)}</span>` : ''}
-          ${e.range ? `<span class="pill">Område: ${esc(e.range)}</span>` : ''}
+          ${e.size ? `<span class="pill">${t('size')}: ${esc(e.size)}</span>` : ''}
+          ${e.range ? `<span class="pill">${t('range')}: ${esc(e.range)}</span>` : ''}
         </div>
-        <button class="fav-btn ${isFav ? 'on' : ''}" id="favToggle">${isFav ? '★ Gemt som favorit' : '☆ Gem som favorit'}</button>
+        <button class="fav-btn ${isFav ? 'on' : ''}" id="favToggle">${isFav ? t('favOn') : t('favOff')}</button>
       </div>
       ${rangeBox(e)}
-      ${e.example ? `<div class="section-title">Eksempel</div><pre class="code">${esc(e.example)}</pre>` : ''}
-      <div class="section-title">Pr. leverandør</div>
+      ${e.example ? `<div class="section-title">${t('example')}</div><pre class="code">${esc(e.example)}</pre>` : ''}
+      <div class="section-title">${t('perVendor')}</div>
       <div class="vendors">${vendors}</div>`;
     $('#favToggle').addEventListener('click', () => {
       state.favs.has(e.id) ? state.favs.delete(e.id) : state.favs.add(e.id);
@@ -189,7 +292,7 @@
         <div><span class="range-label">Min</span><span class="range-val">${esc(min)}</span></div>
         <div><span class="range-label">Max</span><span class="range-val">${esc(max)}</span></div>
       </div>`;
-    return `<div class="section-title">Værdiområde</div>
+    return `<div class="section-title">${t('valueRange')}</div>
       <div class="range-box">
         ${pair(r.min, r.max)}
         ${r.alt ? `<div class="range-alt">${esc(r.alt.label)}</div>${pair(r.alt.min, r.alt.max)}` : ''}
@@ -199,28 +302,29 @@
   }
 
   function renderSearch() {
-    setChrome('Søgning', true, 'home');
+    setChrome(t('search'), true, 'home');
     const res = searchEntries(state.query);
-    view.innerHTML = `<div class="section-title">${res.length} resultat${res.length === 1 ? '' : 'er'} for “${esc(state.query)}”</div>${rowList(res)}`;
+    view.innerHTML = `<div class="section-title">${t('resultsFor', t('results', res.length), esc(state.query))}</div>${rowList(res)}`;
   }
 
   function renderFavs() {
-    setChrome('Favoritter', false, 'favs');
+    setChrome(t('tabFavs'), false, 'favs');
     const entries = state.data.entries.filter(e => state.favs.has(e.id));
     view.innerHTML = entries.length
-      ? `<div class="section-title">Dine gemte opslag</div>${rowList(entries)}`
-      : '<p class="empty">Ingen favoritter endnu.<br>Tryk ☆ på et opslag for at gemme det her.</p>';
+      ? `<div class="section-title">${t('yourFavs')}</div>${rowList(entries)}`
+      : `<p class="empty">${t('noFavs')}</p>`;
   }
 
   // ---------- Navnebygger ----------
   const TYPES = state => state.data.entries.filter(e => e.category === 'types');
+  // Tekster (label/desc) hentes fra I18N, så de følger sproget
   const SCOPES = [
-    { id: 'local', label: 'Lokal (VAR)', prefix: '', desc: '' },
-    { id: 'in', label: 'Input (VAR_INPUT)', prefix: 'i', desc: 'input' },
-    { id: 'out', label: 'Output (VAR_OUTPUT)', prefix: 'q', desc: 'output' },
-    { id: 'inout', label: 'In/Out (VAR_IN_OUT)', prefix: 'io', desc: 'in/out' },
-    { id: 'global', label: 'Global', prefix: 'g', desc: 'global' },
-    { id: 'const', label: 'Konstant', prefix: 'c', desc: 'konstant' }
+    { id: 'local', prefix: '' },
+    { id: 'in', prefix: 'i' },
+    { id: 'out', prefix: 'q' },
+    { id: 'inout', prefix: 'io' },
+    { id: 'global', prefix: 'g' },
+    { id: 'const', prefix: 'c' }
   ];
   const CASES = [
     { id: 'camel', label: 'camelCase', ex: 'startButton' },
@@ -236,15 +340,15 @@
   function buildName(o) {
     const w = words(o.text);
     if (!w.length) return [];
-    const t = state.data.entries.find(e => e.id === o.type);
+    const tp_ = state.data.entries.find(e => e.id === o.type);
     const scope = SCOPES.find(s => s.id === o.scope);
     const parts = [];
     const snakeStyle = ['snake', 'pascalsnake', 'upper'].includes(o.casing);
-    const hasPrefix = (o.useScope && scope?.prefix) || (o.useType && t);
-    if (o.useScope && scope?.prefix) parts.push({ text: scope.prefix + '_', kind: 'scope', desc: `scope: ${scope.desc}` });
-    if (o.useType && t) {
-      const tp = t.prefix.split(/[\s/]/)[0];
-      parts.push({ text: tp + (snakeStyle ? '_' : ''), kind: 'type', desc: `type: ${t.title}` });
+    const hasPrefix = (o.useScope && scope?.prefix) || (o.useType && tp_);
+    if (o.useScope && scope?.prefix) parts.push({ text: scope.prefix + '_', kind: 'scope', desc: t('partScope', t('scopeDesc')[scope.id]) });
+    if (o.useType && tp_) {
+      const tp = tp_.prefix.split(/[\s/]/)[0];
+      parts.push({ text: tp + (snakeStyle ? '_' : ''), kind: 'type', desc: t('partType', tp_.title) });
     }
     let name;
     switch (o.casing) {
@@ -254,28 +358,28 @@
       case 'pascalsnake': name = w.map(cap).join('_'); break;
       default: name = w.map(x => x.toUpperCase()).join('_');
     }
-    parts.push({ text: name, kind: 'name', desc: 'beskrivende navn' });
+    parts.push({ text: name, kind: 'name', desc: t('partName') });
     return parts;
   }
 
   function renderBuilder() {
-    setChrome('Navnebygger', false, 'builder');
+    setChrome(t('tabBuilder'), false, 'builder');
     const def = { casing: 'camel', useType: true, useScope: true, scope: 'in', type: 'bool', text: 'start button' };
     const saved = Object.assign({}, def, store.get('builder2', {}));
     const typeOpts = TYPES(state).map(e => `<option value="${esc(e.id)}">${esc(e.title)} (${esc(e.prefix)})</option>`).join('');
-    const scopeOpts = SCOPES.map(s => `<option value="${s.id}">${esc(s.label)}${s.prefix ? ` (${s.prefix}_)` : ''}</option>`).join('');
-    const caseOpts = CASES.map(c => `<option value="${c.id}">${esc(c.label)} (fx ${esc(c.ex)})</option>`).join('');
+    const scopeOpts = SCOPES.map(s => `<option value="${s.id}">${esc(t('scopeLabels')[s.id])}${s.prefix ? ` (${s.prefix}_)` : ''}</option>`).join('');
+    const caseOpts = CASES.map(c => `<option value="${c.id}">${esc(c.label)} (${t('eg')} ${esc(c.ex)})</option>`).join('');
     view.innerHTML = `
-      <div class="section-title">Byg et variabelnavn og kombinér stilarter</div>
+      <div class="section-title">${t('bTitle')}</div>
       <div class="builder">
-        <label>Hvad er det? (skriv med almindelige ord, gerne på engelsk)
-          <input id="bText" type="text" placeholder="fx start button"></label>
-        <label>Skrivemåde<select id="bCasing">${caseOpts}</select></label>
-        <label class="check"><input id="bUseType" type="checkbox"> <span><strong>Ungarsk notation</strong> (typepræfiks, fx x for BOOL)</span></label>
-        <label id="bTypeWrap">Datatype<select id="bType">${typeOpts}</select></label>
-        <label class="check"><input id="bUseScope" type="checkbox"> <span><strong>Scope-præfiks</strong> (fx i_ for input, g_ for global)</span></label>
-        <label id="bScopeWrap">Scope<select id="bScope">${scopeOpts}</select></label>
-        <div><div class="hint">Resultat</div><div class="result" id="bResult">–</div></div>
+        <label>${t('bText')}
+          <input id="bText" type="text" placeholder="${esc(t('bTextPh'))}"></label>
+        <label>${t('bCasing')}<select id="bCasing">${caseOpts}</select></label>
+        <label class="check"><input id="bUseType" type="checkbox"> <span>${t('bUseType')}</span></label>
+        <label id="bTypeWrap">${t('bType')}<select id="bType">${typeOpts}</select></label>
+        <label class="check"><input id="bUseScope" type="checkbox"> <span>${t('bUseScope')}</span></label>
+        <label id="bScopeWrap">${t('bScope')}<select id="bScope">${scopeOpts}</select></label>
+        <div><div class="hint">${t('bResult')}</div><div class="result" id="bResult">–</div></div>
         <div class="parts" id="bParts"></div>
         <p class="hint" id="bHint"></p>
       </div>`;
@@ -292,11 +396,11 @@
       $('#bResult').innerHTML = parts.length ? parts.map(p => `<span class="part-${p.kind}">${esc(p.text)}</span>`).join('') : '–';
       $('#bParts').innerHTML = parts.map(p => `<span class="part-chip part-${p.kind}"><code>${esc(p.text.replace(/_$/, ''))}</code> ${esc(p.desc)}</span>`).join('');
       const tips = [];
-      if (o.useType && o.casing === 'camel') tips.push('Ungarsk notation + camelCase: præfikset står med småt, og hvert ord i navnet starter med stort. Det er CODESYS\' egen anbefaling.');
-      if (!o.useType && o.casing === 'camel') tips.push('Ren camelCase uden typepræfiks. Det anbefaler Siemens\' styleguide.');
-      if (o.casing === 'pascalsnake') tips.push('Pascal_Snake_Case er udbredt i Allen-Bradley, hvor tags ikke skelner mellem store og små bogstaver.');
-      if (o.casing === 'upper') tips.push('STORE_BOGSTAVER bruges normalt kun til konstanter.');
-      if (full.length > 40) tips.push(`Navnet er ${full.length} tegn. Allen-Bradley tillader højst 40.`);
+      if (o.useType && o.casing === 'camel') tips.push(t('tipHungCamel'));
+      if (!o.useType && o.casing === 'camel') tips.push(t('tipCamel'));
+      if (o.casing === 'pascalsnake') tips.push(t('tipPascalSnake'));
+      if (o.casing === 'upper') tips.push(t('tipUpper'));
+      if (full.length > 40) tips.push(t('tipLength', full.length));
       $('#bHint').textContent = tips.join(' ');
     };
     Object.values(els).forEach(el => { el.addEventListener('input', update); el.addEventListener('change', update); });
@@ -323,11 +427,13 @@
 
   // ---------- Start ----------
   syncVendorChips();
+  applyStaticTexts();
   fetch('data/notation.json')
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(d => { state.data = d; render(); })
+    .then(d => { state.raw.da = d; return loadLang(lang).catch(() => { lang = 'da'; applyStaticTexts(); }); })
+    .then(() => { useData(); render(); })
     .catch(err => {
-      view.innerHTML = `<p class="empty">Kunne ikke indlæse data (${esc(err.message)}).<br>Start appen via en webserver, fx <code>python -m http.server</code>.</p>`;
+      view.innerHTML = `<p class="empty">${t('loadError', esc(err.message))}</p>`;
     });
 
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {

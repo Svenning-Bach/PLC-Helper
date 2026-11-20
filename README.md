@@ -13,6 +13,7 @@ Appen er en *Progressive Web App*: én kodebase i HTML/CSS/JavaScript, der kan i
 - Mærkning af om noget er officiel anbefaling, udbredt praksis eller indbygget
 - Favoritter (gemmes på enheden)
 - Navnebygger: skriv "start button" og kombinér skrivemåde (camelCase, PascalCase, snake_case …) med ungarsk notation og scope-præfiks, fx `i_xStartButton`, `startButton` eller `Start_Button`
+- Dansk/engelsk: knappen DA/EN i toppen skifter alt indhold og alle menuer til engelsk (valget huskes)
 - Lyst/mørkt tema, offline og installérbar
 
 ## Kør den på din computer
@@ -44,7 +45,9 @@ Alt indhold ligger i `data/notation.json`. Et opslag ser sådan ud:
   "tags": ["flanke", "edge"]
 }
 ```
-`status` er `official`, `common` eller `builtin`. Når du ændrer filer, så hæv `VERSION` i `sw.js`, så telefoner henter den nye udgave.
+`status` er `official`, `common` eller `builtin`.
+
+Den engelske oversættelse ligger i `data/notation.en.json`, opdelt efter `id`. Den indeholder kun tekstfelterne (title, meaning, note, tags osv.); felter der mangler, vises på dansk. Husk at skrive tal med engelsk format dér (65,535 og 3.402823). Når du tilføjer et nyt opslag, så tilføj også dets engelske tekst. Når du ændrer filer, så hæv `VERSION` i `sw.js`, så telefoner henter den nye udgave.
 
 ## Filer
 | Fil | Indhold |
@@ -53,5 +56,6 @@ Alt indhold ligger i `data/notation.json`. Et opslag ser sådan ud:
 | `styles.css` | Design (lyst og mørkt tema) |
 | `app.js` | Logik: kategorier, søgning, filter, favoritter, navnebygger |
 | `data/notation.json` | Alt indhold |
+| `data/notation.en.json` | Engelsk oversættelse af indholdet |
 | `sw.js` | Offline-cache |
 | `manifest.webmanifest`, `icons/` | Installation og ikon |

@@ -15,15 +15,16 @@
 </head>
 <body>
   <header class="topbar">
-    <button id="backBtn" class="icon-btn" aria-label="Tilbage" hidden>‹</button>
+    <button id="backBtn" class="icon-btn" aria-label="Tilbage" data-i18n-aria="back" hidden>‹</button>
     <h1 id="pageTitle">PLC Notation</h1>
-    <button id="themeBtn" class="icon-btn" aria-label="Skift lyst/mørkt tema">◐</button>
+    <button id="langBtn" class="icon-btn lang-btn" aria-label="Switch to English" data-i18n-aria="langAria" data-i18n="langBtn">EN</button>
+    <button id="themeBtn" class="icon-btn" aria-label="Skift lyst/mørkt tema" data-i18n-aria="theme">◐</button>
   </header>
 
   <div class="controls">
-    <input id="search" type="search" placeholder="Søg: R_TRIG, int, timer, flanke…" autocomplete="off" aria-label="Søg">
-    <div class="vendor-filter" role="group" aria-label="Vælg leverandør">
-      <button data-vendor="all" class="chip active">Alle</button>
+    <input id="search" type="search" placeholder="Søg: R_TRIG, int, timer, flanke…" autocomplete="off" aria-label="Søg" data-i18n-ph="searchPh" data-i18n-aria="searchAria">
+    <div class="vendor-filter" role="group" aria-label="Vælg leverandør" data-i18n-aria="vendorAria">
+      <button data-vendor="all" class="chip active" data-i18n="all">Alle</button>
       <button data-vendor="codesys" class="chip">CODESYS</button>
       <button data-vendor="siemens" class="chip">Siemens</button>
       <button data-vendor="ab" class="chip">Allen-Bradley</button>
@@ -32,10 +33,10 @@
 
   <main id="view" tabindex="-1"></main>
 
-  <nav class="tabbar" aria-label="Hovedmenu">
-    <button data-tab="home" class="tab active"><span>▦</span>Kategorier</button>
-    <button data-tab="favs" class="tab"><span>★</span>Favoritter</button>
-    <button data-tab="builder" class="tab"><span>✎</span>Navnebygger</button>
+  <nav class="tabbar" aria-label="Hovedmenu" data-i18n-aria="menuAria">
+    <button data-tab="home" class="tab active"><span>▦</span><b data-i18n="tabHome">Kategorier</b></button>
+    <button data-tab="favs" class="tab"><span>★</span><b data-i18n="tabFavs">Favoritter</b></button>
+    <button data-tab="builder" class="tab"><span>✎</span><b data-i18n="tabBuilder">Navnebygger</b></button>
   </nav>
 
   <script src="app.js"></script>
