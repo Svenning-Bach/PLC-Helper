@@ -1,7 +1,7 @@
 // Service worker: gør appen tilgængelig offline. Hæv VERSION når filer ændres.
-const VERSION = 'plc-notation-v0.3.0';
+const VERSION = 'plc-notation-v0.4.0';
 const FILES = [
-  './', 'index.html', 'styles.css', 'app.js', 'data/notation.json',
+  './', 'index.html', 'styles.css', 'app.js', 'data/notation.json', 'data/notation.en.json',
   'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png'
 ];
 
@@ -20,7 +20,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
-  if (url.pathname.endsWith('notation.json')) {
+  if (/notation(\.en)?\.json$/.test(url.pathname)) {
     e.respondWith(
       fetch(e.request)
         .then(r => { const copy = r.clone(); caches.open(VERSION).then(c => c.put(e.request, copy)); return r; })

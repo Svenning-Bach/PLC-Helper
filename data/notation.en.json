@@ -1,0 +1,418 @@
+{
+  "_comment": "English translation of notation.json. Only text fields are here; ids, categories and status keys come from notation.json. Fields left out keep the Danish value.",
+  "status": {
+    "official": "Official vendor recommendation",
+    "common": "Common practice (not an official rule)",
+    "builtin": "Built into the system / standard"
+  },
+  "categories": {
+    "types": { "name": "Data types", "description": "Prefixes for elementary data types such as BOOL, INT and REAL." },
+    "fb": { "name": "Function blocks", "description": "Standard blocks such as R_TRIG, F_TRIG, TON and CTU." },
+    "scope": { "name": "Scope and parameters", "description": "Prefixes that show where a variable lives: input, output, global, local." },
+    "io": { "name": "I/O and addresses", "description": "Inputs, outputs, markers and hardware addresses." },
+    "pou": { "name": "Block names and types", "description": "Naming of programs, FBs, functions, structures and enums." },
+    "rules": { "name": "Best practices", "description": "General rules for good variable names." }
+  },
+  "entries": {
+    "bool": {
+      "meaning": "Boolean value: TRUE/FALSE (1 bit)",
+      "vendors": {
+        "codesys": { "note": "CODESYS' own coding conventions use x for BOOL (b is reserved for BIT)." },
+        "siemens": { "note": "The Siemens style guide recommends no type prefix. Use a descriptive name, ideally phrased as a question: isRunning, motorOn." },
+        "ab": { "note": "No official prefix. Many use b_ or no prefix at all." }
+      },
+      "tags": ["true", "false"]
+    },
+    "bit": {
+      "meaning": "Single bit inside a structure",
+      "vendors": {
+        "codesys": { "note": "Only allowed as an element of a STRUCT or FB." },
+        "siemens": { "note": "No separate BIT type. Use Bool or slice access: myWord.%X3." },
+        "ab": { "note": "Access a single bit with a dot: MyDint.5" }
+      }
+    },
+    "byte": {
+      "meaning": "8-bit bit string",
+      "vendors": { "ab": { "note": "AB has no BYTE. SINT (signed 8 bit) is used instead." } },
+      "tags": ["bit string"]
+    },
+    "word": {
+      "meaning": "16-bit bit string",
+      "vendors": { "ab": { "note": "AB has no WORD. INT is used." } },
+      "tags": ["bit string", "control word"],
+      "valueRange": { "max": "65,535" }
+    },
+    "dword": {
+      "meaning": "32-bit bit string (double word)",
+      "vendors": { "ab": { "note": "AB uses DINT for almost everything, bit patterns included." } },
+      "tags": ["bit string"],
+      "valueRange": { "max": "4,294,967,295" }
+    },
+    "sint": {
+      "meaning": "Short integer, 8 bit signed",
+      "vendors": {
+        "codesys": { "note": "USINT (unsigned, 0…255) has the prefix usi." },
+        "siemens": { "note": "USInt also exists." },
+        "ab": { "note": "Rockwell recommends DINT over SINT/INT, because the controller calculates fastest in 32 bit." }
+      },
+      "tags": ["whole number"],
+      "valueRange": { "alt": { "label": "USINT (unsigned)" } }
+    },
+    "int": {
+      "meaning": "Integer, 16 bit signed",
+      "vendors": {
+        "codesys": { "note": "UINT (0…65,535) has the prefix ui." },
+        "siemens": { "note": "Analog inputs on S7 are typically Int (0…27,648 = 0…100 %)." },
+        "ab": { "note": "Prefer DINT, unless the data has to match an external format." }
+      },
+      "tags": ["whole number"],
+      "valueRange": { "min": "-32,768", "max": "32,767", "alt": { "label": "UINT (unsigned)", "max": "65,535" } }
+    },
+    "dint": {
+      "meaning": "Double integer, 32 bit signed",
+      "vendors": {
+        "codesys": { "note": "UDINT has the prefix udi." },
+        "ab": { "note": "The standard integer type in Logix." }
+      },
+      "tags": ["whole number"],
+      "valueRange": { "min": "-2,147,483,648", "max": "2,147,483,647", "alt": { "label": "UDINT (unsigned)", "max": "4,294,967,295" } }
+    },
+    "lint": {
+      "meaning": "Long integer, 64 bit signed",
+      "vendors": {
+        "codesys": { "note": "ULINT has the prefix uli." },
+        "siemens": { "note": "S7-1500 only (not S7-1200)." },
+        "ab": { "note": "Limited instruction support on older firmware." }
+      },
+      "tags": ["whole number"],
+      "valueRange": { "min": "-9,223,372,036,854,775,808", "max": "9,223,372,036,854,775,807", "alt": { "label": "ULINT (unsigned)", "max": "18,446,744,073,709,551,615" } }
+    },
+    "real": {
+      "meaning": "Floating-point number, 32 bit (single precision)",
+      "tags": ["floating point"],
+      "valueRange": { "min": "-3.402823 × 10³⁸", "max": "3.402823 × 10³⁸", "note": "Smallest value near 0: ±1.175494 × 10⁻³⁸. About 7 significant digits." }
+    },
+    "lreal": {
+      "meaning": "Floating-point number, 64 bit (double precision)",
+      "vendors": { "ab": { "note": "Only on newer controllers and firmware." } },
+      "tags": ["floating point"],
+      "valueRange": { "min": "-1.797693 × 10³⁰⁸", "max": "1.797693 × 10³⁰⁸", "note": "Smallest value near 0: ±2.225074 × 10⁻³⁰⁸. About 15 significant digits." }
+    },
+    "string": {
+      "meaning": "Text string (1 byte per character)",
+      "size": "Default 80 characters (CODESYS) / 254 (Siemens) / 82 (AB)",
+      "vendors": {
+        "codesys": { "note": "WSTRING (Unicode) has the prefix ws." },
+        "siemens": { "note": "WString for Unicode." },
+        "ab": { "note": "Structure with .LEN and .DATA[82]." }
+      },
+      "tags": ["text"]
+    },
+    "time": {
+      "meaning": "Time duration (e.g. T#5S)",
+      "vendors": {
+        "codesys": { "note": "LTIME has the prefix ltim. Many also use t or tim." },
+        "siemens": { "note": "LTime on S7-1500 (ns resolution)." },
+        "ab": { "note": "No TIME type. The timer preset is a DINT in milliseconds." }
+      },
+      "tags": ["duration"],
+      "valueRange": { "note": "CODESYS: 0 … 4,294,967,295 ms (unsigned). Siemens Time is signed: T#-24d20h31m23s648ms … T#24d20h31m23s647ms." }
+    },
+    "tod": {
+      "meaning": "Time of day (e.g. TOD#14:30:00)",
+      "vendors": { "ab": { "note": "Read with GSV WallClockTime as a DINT array." } },
+      "tags": ["clock", "time"]
+    },
+    "dt": {
+      "meaning": "Date and time of day",
+      "vendors": {
+        "codesys": { "note": "DATE has the prefix date." },
+        "siemens": { "note": "DTL (structure) is recommended on S7-1200/1500." },
+        "ab": { "note": "WallClockTime via GSV." }
+      },
+      "tags": ["date", "timestamp"]
+    },
+    "array": {
+      "meaning": "List of elements of the same type",
+      "vendors": {
+        "codesys": { "note": "Prefixes are combined: arTemps = ARRAY OF REAL." },
+        "ab": { "note": "Always starts at index 0." }
+      },
+      "tags": ["list", "table"]
+    },
+    "pointer": {
+      "meaning": "Pointer or reference to another variable",
+      "vendors": {
+        "siemens": { "note": "Ref_To on S7-1500 only." },
+        "ab": { "type": "InOut parameter in an AOI", "note": "No pointers. Use InOut or indirect addressing." }
+      },
+      "tags": ["address"]
+    },
+    "rtrig": {
+      "title": "Rising trigger (rising edge)",
+      "meaning": "Q is TRUE for one scan when CLK goes from FALSE to TRUE",
+      "vendors": {
+        "codesys": { "note": "Standard IEC block. Instance name e.g. rtStart or fbStartEdge." },
+        "siemens": { "note": "In LAD there is the P contact and P_TRIG. R_TRIG needs an instance (multi-instance in an FB)." },
+        "ab": { "note": "ONS (contact) or OSR (output). Needs a storage bit, e.g. StartButton_ONS." }
+      },
+      "tags": ["positive edge"]
+    },
+    "ftrig": {
+      "title": "Falling trigger (falling edge)",
+      "meaning": "Q is TRUE for one scan when CLK goes from TRUE to FALSE",
+      "vendors": { "siemens": { "note": "The N contact in LAD." } },
+      "tags": ["negative edge"]
+    },
+    "ton": {
+      "title": "Timer On-Delay",
+      "meaning": "Q becomes TRUE when IN has been TRUE for the time PT",
+      "vendors": {
+        "codesys": { "note": "Outputs: Q and ET (elapsed time)." },
+        "siemens": { "note": "Instance as multi-instance or its own DB. Outputs Q and ET." },
+        "ab": { "note": "Members: .PRE, .ACC (ms), .EN, .TT, .DN." }
+      },
+      "tags": ["delay", "time relay"]
+    },
+    "tof": {
+      "title": "Timer Off-Delay",
+      "meaning": "Q stays TRUE for the time PT after IN goes FALSE",
+      "tags": ["run-on", "delay"]
+    },
+    "tp": {
+      "title": "Timer Pulse",
+      "meaning": "Gives a pulse of fixed length PT on a rising edge at IN",
+      "vendors": { "ab": { "note": "No TP in ladder. Build it with ONS + TON, or use TONR/FBD blocks." } }
+    },
+    "ctu": {
+      "title": "Counter Up",
+      "meaning": "Counts CV up on every rising edge at CU. Q = CV >= PV",
+      "vendors": {
+        "codesys": { "note": "CTD (down) and CTUD (up/down) also exist." },
+        "ab": { "note": "Members: .PRE, .ACC, .CU, .DN, .OV, .UN." }
+      },
+      "tags": ["count"]
+    },
+    "sr": {
+      "meaning": "Remembers a state. SR: set is dominant. RS: reset is dominant",
+      "vendors": { "ab": { "note": "Latch and unlatch coils in ladder." } },
+      "tags": ["memory", "seal-in"]
+    },
+    "fb-instance": {
+      "title": "Instance of your own function block",
+      "meaning": "Variable that is an instance of an FB",
+      "vendors": {
+        "codesys": { "type": "FB instance" },
+        "siemens": { "note": "The instance DB is automatically named after the FB + _DB." },
+        "ab": { "type": "AOI instance", "note": "E.g. Motor1 : AOI_Motor." }
+      }
+    },
+    "in": {
+      "title": "Input parameter (VAR_INPUT)",
+      "meaning": "Value passed into a block",
+      "vendors": {
+        "codesys": { "note": "E.g. inxStart or i_xStart. Pick one style and stick to it." },
+        "siemens": { "note": "Siemens shows the section itself. The style guide uses camelCase without a prefix." }
+      }
+    },
+    "out": {
+      "title": "Output parameter (VAR_OUTPUT)",
+      "meaning": "Value the block returns",
+      "vendors": { "codesys": { "note": "q_ follows the IEC letter Q for output." } }
+    },
+    "inout": {
+      "title": "In/Out parameter (VAR_IN_OUT)",
+      "meaning": "Variable passed in by reference that can be changed",
+      "vendors": { "ab": { "note": "The only way to pass arrays and structures by reference." } }
+    },
+    "global": {
+      "title": "Global variable",
+      "meaning": "Visible in the whole program",
+      "vendors": {
+        "codesys": { "note": "With {attribute 'qualified_only'} you write GVL.name, so a prefix is not needed." },
+        "siemens": { "type": "PLC tag / global DB", "note": "Global data is written as \"DB_name\".variable." },
+        "ab": { "note": "Use program-scoped tags where possible." }
+      }
+    },
+    "local": {
+      "prefix": "(none) / l_",
+      "title": "Local variable (VAR)",
+      "meaning": "Only visible inside the block",
+      "vendors": {
+        "codesys": { "note": "Most people only use a type prefix for local variables." },
+        "siemens": { "note": "Temp variables are not kept between scans. Some use tmp_ for Temp." }
+      }
+    },
+    "const": {
+      "prefix": "c_ / UPPER_CASE",
+      "title": "Constant",
+      "meaning": "Value that cannot be changed at runtime",
+      "vendors": {
+        "codesys": { "note": "Many write constants in UPPER_CASE: MAX_SPEED." },
+        "siemens": { "type": "Constant (local/global constants)", "note": "The style guide uses UPPER_CASE for constants." },
+        "ab": { "type": "Tag with the Constant flag" }
+      }
+    },
+    "retain": {
+      "meaning": "Kept through power loss or restart",
+      "vendors": {
+        "codesys": { "note": "Avoid r_ if you also use r for REAL. Prefer ret_." },
+        "siemens": { "type": "Retain checkbox in the DB" },
+        "ab": { "type": "All tags are retentive", "note": "Logix keeps tag values by default." }
+      }
+    },
+    "di": {
+      "title": "Digital input",
+      "meaning": "Physical digital signal into the PLC (e.g. push button, sensor)",
+      "vendors": {
+        "codesys": { "note": "Map I/O to variables in the I/O mapping." },
+        "siemens": { "note": "German notation uses E (Eingang) instead of I." },
+        "ab": { "note": "Create alias tags with meaningful names." }
+      }
+    },
+    "do": {
+      "title": "Digital output",
+      "meaning": "Physical digital signal out of the PLC (e.g. relay, valve)",
+      "vendors": { "siemens": { "note": "German notation: A (Ausgang)." } },
+      "tags": ["relay", "valve"]
+    },
+    "ai": {
+      "title": "Analog input",
+      "meaning": "Analog signal in (4–20 mA, 0–10 V)",
+      "vendors": {
+        "siemens": { "note": "Raw value 0…27648. Scale with NORM_X and SCALE_X." },
+        "ab": { "note": "Modules can scale directly to engineering units." }
+      },
+      "tags": ["scaling"]
+    },
+    "ao": {
+      "title": "Analog output",
+      "meaning": "Analog signal out (e.g. frequency converter speed reference)",
+      "tags": ["vfd", "drive"]
+    },
+    "marker": {
+      "title": "Marker / internal memory",
+      "meaning": "Internal bit or word in the PLC's memory",
+      "vendors": {
+        "codesys": { "note": "Prefer symbolic variables." },
+        "siemens": { "note": "The style guide advises against markers. Use DBs instead." },
+        "ab": { "type": "Tags (no markers)", "note": "Logix is fully tag based." }
+      },
+      "tags": ["marker"]
+    },
+    "prg": {
+      "meaning": "Program POU called from a task",
+      "vendors": {
+        "codesys": { "note": "MAIN is often just called MAIN." },
+        "siemens": { "note": "OB1 = Main, OB100 = startup, OB30-38 = cyclic." },
+        "ab": { "note": "MainRoutine is the default." }
+      }
+    },
+    "fbtype": {
+      "meaning": "Block with memory (instance data)",
+      "vendors": { "siemens": { "note": "Style guide: PascalCase without a prefix, e.g. Conveyor. The FB_ prefix is still very common though." } }
+    },
+    "fc": {
+      "title": "Function",
+      "meaning": "Block without memory that returns a value"
+    },
+    "struct": {
+      "title": "Structure (user-defined type)",
+      "meaning": "Collection of variables in one type",
+      "vendors": {
+        "codesys": { "prefix": "ST_ (type), st (variable)" },
+        "siemens": { "note": "The style guide uses the prefix typ, e.g. typMotor." }
+      },
+      "tags": ["structure"]
+    },
+    "enum": {
+      "meaning": "List of named values (e.g. states)",
+      "vendors": {
+        "codesys": { "prefix": "E_ (type), e (variable)", "note": "Use {attribute 'qualified_only'} so you write E_State.Idle." },
+        "siemens": { "type": "– (constants)", "note": "TIA has no ENUM. Use constants of type Int." },
+        "ab": { "note": "No ENUM. Use DINT constants." }
+      },
+      "tags": ["state"]
+    },
+    "interface": {
+      "meaning": "Contract that FBs can implement (OOP)",
+      "vendors": { "siemens": { "note": "Not supported in classic TIA (but available in SIMATIC AX)." } },
+      "tags": ["object oriented"]
+    },
+    "db": {
+      "title": "Data block / global variable list",
+      "meaning": "Where global data lives",
+      "tags": ["data block"]
+    },
+    "rule-descriptive": {
+      "prefix": "Name",
+      "title": "Descriptive names",
+      "meaning": "The name should say what the variable is, not how it happens to be used right now",
+      "vendors": {
+        "codesys": { "note": "Good: xConveyorRunning. Bad: x1, temp, flag3." },
+        "siemens": { "note": "Style guide: use meaningful English names." },
+        "ab": { "note": "Use tag descriptions too." }
+      },
+      "example": "xConveyorRunning   (not: x1 or flag3)",
+      "tags": ["rule", "naming", "readability"]
+    },
+    "rule-case": {
+      "title": "Upper and lower case",
+      "meaning": "Pick one way of writing and use it everywhere",
+      "vendors": {
+        "codesys": { "note": "Lower-case prefix + PascalCase: xMotorOn. Types: FB_Motor." },
+        "siemens": { "note": "Variables in camelCase (motorOn), blocks in PascalCase (Motor), constants in UPPER_CASE." },
+        "ab": { "note": "Tags are not case sensitive, but use PascalCase or Under_Score for readability." }
+      },
+      "tags": ["naming style", "case"]
+    },
+    "rule-length": {
+      "title": "Length and allowed characters",
+      "meaning": "Keep names short enough to read in ladder",
+      "vendors": {
+        "codesys": { "note": "Only letters, digits and _. Must not start with a digit. No double __." },
+        "siemens": { "note": "Up to 128 characters, but short names are easier to read in LAD." },
+        "ab": { "note": "Max 40 characters. No double or trailing underscores." }
+      },
+      "example": "Motor1_Run  (OK)   1Motor__Run_  (not OK)",
+      "tags": ["length", "characters"]
+    },
+    "rule-bool-names": {
+      "title": "BOOL as a yes/no question",
+      "meaning": "A boolean name should read as true or false",
+      "example": "xDoorClosed  (not: xDoor)",
+      "tags": ["naming"]
+    },
+    "rule-units": {
+      "title": "Units in the name",
+      "meaning": "Put the unit in the name of physical values",
+      "vendors": {
+        "siemens": { "note": "It can also go in the comment, but the name is visible everywhere." },
+        "ab": { "note": "Engineering units can be set on analog modules." }
+      },
+      "tags": ["unit", "scaling"]
+    },
+    "rule-consistency": {
+      "title": "Consistency beats perfection",
+      "meaning": "Follow the company's or project's standard, even if you personally prefer something else",
+      "vendors": {
+        "codesys": { "note": "CODESYS has its own coding conventions in the help and static analysis that can check names." },
+        "siemens": { "note": "Siemens Programming Styleguide for S7-1200/S7-1500 (free on Siemens Industry Online Support)." },
+        "ab": { "note": "Rockwell's Logix 5000 Design Considerations and PlantPAx guides." }
+      },
+      "example": "Write your naming standard down in the project",
+      "tags": ["consistency"]
+    },
+    "rule-rds": {
+      "title": "Link names to the electrical diagram",
+      "meaning": "Use the reference designation from the electrical drawing (IEC 81346) in the tag name or description",
+      "vendors": {
+        "codesys": { "note": "E.g. xB1_LevelHigh, where B1 is the sensor on the drawing." },
+        "siemens": { "note": "The comment field is a good place for the full RDS designation." },
+        "ab": { "note": "Use an alias tag with the RDS name on the I/O point." }
+      },
+      "example": "xDI_B12_TankFull  (B12 = level sensor on the drawing)",
+      "tags": ["electrical diagram", "reference designation"]
+    }
+  }
+}
